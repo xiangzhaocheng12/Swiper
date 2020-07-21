@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'SwiperSocial.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'swipter',
+        'NAME': 'swiper',
         'HOST': '39.106.162.75',
         'POST': '3306',
         'USER': 'JiangCheng',
