@@ -22,4 +22,6 @@ urlpatterns = [
     # url(r'^admin/', admin.site.urls),
     url(r'^$',views.home),
     url(r'^api/user/', include('user.urls',namespace='user')),
+    url(r'^qiniu/',include('qiNiu.urls',namespace='qiniu')),
+    # url(r'^api/social/',include('social.urls',namespace='urls'))
 ]
