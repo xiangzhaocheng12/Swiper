@@ -1,67 +1,82 @@
 import json
 
-from django.http import JsonResponse
-from django.shortcuts import render
-import time
-import requests
-import json
-import hashlib
+from django.core.cache import cache
+# 这个是自己写的 render返回函数, 用来代替原先的JsonResponse()
 
+from libs.http_ import render_json
 
 # Create your views here.
+from common import keys
 from user import logics
+from user.models import User
+from common import stat
 
 
 def fetch(request):
     """ 提交手机号 """
     # GET 是一个字典类型
     phonenum = request.GET.get('phonenum')
-
     # 检查用户手机号是否正确
     if logics.is_phonenum(phonenum):
-        logics.send_sms(phonenum)
-
-    else:
-
-        return JsonResponse(data)
+        # 如果手机号正确的话, 发送验证码, 判断是否发送成功
+        if logics.send_vcode(phonenum):
+            return render_json()
+    # 如果手机号验证失败的话, 直接返回验证码发送失败
+    return render_json(code=stat.SEND_FAILD)
 
 
 def submit(request):
-    phonenum = request.GET.get('phonenum')
-    vcode = request.GET.get('vcode')
-    # 需要返回的数据
-    code = 0
-    data = {
-        "code": 0,
-        "data": {
-            'id': 1002,
-            'nickname': 'Miao',
-            'birthday': '2000-01-01',
-            'gender': 'male',
-            'location': '北京',
-            'avatar': 'http://xxx.com/a/b/c.png'
-        }
-    }
-    return JsonResponse(data)
+    """提交验证码, 完成登陆、注册"""
+    # strip() 用来取出字符串两端空格
+    phonenum = request.POST.get('phonenum','').strip()
+    vcode = request.POST.get('vcode','').strip()
+
+    # 从缓存获取验证码
+    key = keys.VCODE_K % phonenum
+    cached_vcode = cache.get(key)
+
+    # 检查验证码
+    # vcode: 用户提交的验证码,     cached_vcode: 缓存中的验证码
+    # 需要考虑下面这种情况:
+    #       None == None
+    if vcode and vcode == cached_vcode:
+        # 根据手机号获取用户
+        # flask 里面不是 objects, 而是一个query
+        # get:只能获取一个
+        try:
+            user = User.objects.get(phonenum=phonenum)
+        # 这里不能只写一个except, 需要精确的写上一个异常
+        except User.DoesNotExist:
+            # user = User()
+            # ....
+            # user.save()
+            # 法2：
+            user = User.objects.create(phonenum = phonenum,nickname = phonenum)
+
+        # 通过 Session 记录用户登陆状态
+        request.session['uid'] = user.id
+        return render_json(user.to_dict())
+    else:
+        return render_json(code=stat.VCODE_ERR)
 
 
 def show(request):
     data = {
-        "code":0,
-        "data":{
-            "id":1002,
-            "dating_gender":"female",
-            "dating_location":"北京",
-            "max_distance":10,
-            "min_distance":1,
-            "max_dating_age":50,
-            "min_dating_age":20,
-            "vibration":False,
-            "only_matched":False,
-            "auto_play":False,
+        "code": 0,
+        "data": {
+            "id": 1002,
+            "dating_gender": "female",
+            "dating_location": "北京",
+            "max_distance": 10,
+            "min_distance": 1,
+            "max_dating_age": 50,
+            "min_dating_age": 20,
+            "vibration": False,
+            "only_matched": False,
+            "auto_play": False,
         }
     }
-    return JsonResponse(data)
+    return render_json()
 
 
 def update(request):
@@ -79,11 +94,11 @@ def update(request):
     only_matched = request.POST.get('only_matched')
     auto_play = request.POST.get('auto_play')
 
-    data  = {
-        "data":None
+    data = {
+        "data": None
     }
-    return JsonResponse(data)
+    return render_json()
 
 
 def qn_token(request):
-    return JsonResponse(data = {'a':123})
+    return render_json()

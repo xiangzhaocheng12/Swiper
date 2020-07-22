@@ -26,7 +26,7 @@ class User(models.Model):
     birthday = models.DateField(default='2000-01-01', verbose_name='出生日')
     # ImageField 保存的是文件路径, 这里保存的是一个网址的路径
     avatar = models.CharField(max_length=256, verbose_name='个人形象 URL')
-    location = models.Field(max_length=10, choices=LOCATIONS, default='上海', verbose_name='常居地')
+    location = models.CharField(max_length=10, choices=LOCATIONS, default='上海', verbose_name='常居地')
 
 # 各种的 int 大小
 # tiny int    1 字节    8个二进制位     最大可以存储2^8 = 255
@@ -34,3 +34,12 @@ class User(models.Model):
 
 
 # Mysql 也是可以保存二进制的数据: blob数据类型, 但是不建议使用
+    def to_dict(self):
+        return {
+        'phonenum' : self.phonenum,
+        'nickname' : self.nickname,
+        'gender' : self.gender,
+        'birthday' : self.birthday,
+        'avatar' : self.avatar,
+        'location' : self.location,
+        }

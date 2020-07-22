@@ -4,7 +4,8 @@ import random
 # 先编译一些
 from django.core.cache import cache
 
-from Swiper.libs.sms import send_sms
+from libs.sms import send_sms
+from common.keys import VCODE_K
 
 P_PHONENUM = re.compile(r'^1[3456789]\d{9}$')
 
@@ -17,21 +18,23 @@ def is_phonenum(phonenum):
 
 def gen_randcode(length):
     """产生指定长度的随机码"""
-    random.choice
-    random.
+    chars = random.choices('012345678',k = length)
+    return ''.join(chars)
 
 
 def send_vcode(phonenum):
     """向用户手机发送验证码"""
-    key = 'Vcode-%s' % phonenum
+    key = VCODE_K % phonenum
 
     # 检查十五分钟之内是否被该用户发送验证码, 防止恶意获取
     if cache.get(key):
         return True
 
     vcode = gen_randcode(6)  # 定义验证码
-    result = send_sms(phonenum, vcode)  # 发送验证码
-
+    time_str = '10分钟'
+    print(vcode)
+    # result = send_sms(phonenum, vcode,time_str)  # 发送验证码
+    result = {'status':'success'}
     if result.get('status') == 'success':
         cache.set(key, vcode, 900)  # 多为用户保留五分钟
         return True
