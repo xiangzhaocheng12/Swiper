@@ -8,7 +8,7 @@ from libs.http_ import render_json
 # Create your views here.
 from common import keys
 from user import logics
-from user.models import User
+from user.models import User, Profile
 from common import stat
 
 
@@ -61,22 +61,9 @@ def submit(request):
 
 
 def show(request):
-    data = {
-        "code": 0,
-        "data": {
-            "id": 1002,
-            "dating_gender": "female",
-            "dating_location": "北京",
-            "max_distance": 10,
-            "min_distance": 1,
-            "max_dating_age": 50,
-            "min_dating_age": 20,
-            "vibration": False,
-            "only_matched": False,
-            "auto_play": False,
-        }
-    }
-    return render_json()
+    code = stat.OK
+    profile = Profile.objects.get()
+    return render_json(profile.to_dict())
 
 
 def update(request):
