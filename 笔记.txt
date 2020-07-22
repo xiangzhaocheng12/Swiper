@@ -1,0 +1,13 @@
+Django 中的类字典对象
+request.GET
+request.POST
+request.FILES
+request.session
+
+
+
+Flase 中的类字典对象
+request.args
+request.form
+request.files
+session

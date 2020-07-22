@@ -9,39 +9,21 @@ import hashlib
 
 
 # Create your views here.
+from user import logics
+
+
 def fetch(request):
+    """ 提交手机号 """
+    # GET 是一个字典类型
     phonenum = request.GET.get('phonenum')
-    api = 'https://api.mysubmail.com/message/xsend'
 
-    appid = '52461'
-    appkey = 'b2a7e3b4f77d220a5c26f3625db7b368'
+    # 检查用户手机号是否正确
+    if logics.is_phonenum(phonenum):
+        logics.send_sms(phonenum)
 
-    # 总共四个参数
-    args = {
-        'appid': appid,
-        'to': phonenum,
-        'project': 'axSpR',
-        'vars': json.dumps({'code': '123456', 'time': '5分钟'}),
-        'timestamp': int(time.time()),
-        'sign_type': 'md5',
-    }
+    else:
 
-    # 数字签名
-    signature_str = \
-        '&'.join([f'{k}={v}' for k, v in sorted(args.items())])
-    string = f'{appid}{appkey}{signature_str}{appid}{appkey}'
-    signature_str = hashlib.md5(string.encode('utf8')).hexdigest()
-    args['signature'] = signature_str
-
-    response = requests.post(api, data=args)
-    print(response.content)
-    print(response.status_code)
-    data = {
-        'code': 200,
-        'data': '注册成功',
-    }
-
-    return JsonResponse(data)
+        return JsonResponse(data)
 
 
 def submit(request):
@@ -104,4 +86,4 @@ def update(request):
 
 
 def qn_token(request):
-    return None
+    return JsonResponse(data = {'a':123})

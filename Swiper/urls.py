@@ -22,5 +22,5 @@ urlpatterns = [
     # url(r'^admin/', admin.site.urls),
     url(r'^$',views.home),
     url(r'^api/user/', include('user.urls',namespace='user')),
-    url(r'^qiniu/',include('user.urls',namespace='qiniu')),
+    url(r'^qiniu/token/', user.api.qn_token),
 ]
