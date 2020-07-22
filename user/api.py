@@ -52,6 +52,7 @@ def submit(request):
             # user.save()
             # 法2：
             user = User.objects.create(phonenum = phonenum,nickname = phonenum)
+            Profile.objects.create(uid=user.id)
 
         # 通过 Session 记录用户登陆状态
         request.session['uid'] = user.id
@@ -61,9 +62,9 @@ def submit(request):
 
 
 def show(request):
-    code = stat.OK
-    profile = Profile.objects.get()
-    return render_json(profile.to_dict())
+    uid = request.session.get('uid')
+    profile = Profile.objects.get(uid = uid)
+    return render_json(data = profile.to_dict())
 
 
 def update(request):

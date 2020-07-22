@@ -13,6 +13,9 @@ def render_json(data=0, code=stat.OK):
     }
     if settings.DEBUG == True:
         # 调试时, 将json 数据转成缩进的数据
+        # indent: 缩进的长度
+        # sort_keys: 表示是否格式化
+        # sort_keys = False   使数据不转化为 ASCII 码
         json_str = json.dumps(result, ensure_ascii=False, indent=4, sort_keys=True)
     else:
         # 线上环境, 将返回值转化成紧凑格式
