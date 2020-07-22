@@ -101,3 +101,7 @@ def update(request):
         "data":None
     }
     return JsonResponse(data)
+
+
+def qn_token(request):
+    return None
