@@ -33,15 +33,12 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    # 'django.contrib.admin',
-    # 'django.contrib.auth',
     'django.contrib.contenttypes',
+    # session 就在这里进行配置的
     'django.contrib.sessions',
-    # 'django.contrib.messages',
     'django.contrib.staticfiles',
     'user',
 ]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

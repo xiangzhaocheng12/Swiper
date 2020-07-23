@@ -28,8 +28,8 @@ def fetch(request):
 def submit(request):
     """提交验证码, 完成登陆、注册"""
     # strip() 用来取出字符串两端空格
-    phonenum = request.POST.get('phonenum','').strip()
-    vcode = request.POST.get('vcode','').strip()
+    phonenum = request.POST.get('phonenum', '').strip()
+    vcode = request.POST.get('vcode', '').strip()
 
     # 从缓存获取验证码
     key = keys.VCODE_K % phonenum
@@ -42,6 +42,7 @@ def submit(request):
     if vcode and vcode == cached_vcode:
         # 根据手机号获取用户
         # flask 里面不是 objects, 而是一个query
+        #   User.query.filter(...).one()
         # get:只能获取一个
         try:
             user = User.objects.get(phonenum=phonenum)
@@ -51,10 +52,11 @@ def submit(request):
             # ....
             # user.save()
             # 法2：
-            user = User.objects.create(phonenum = phonenum,nickname = phonenum)
+            user = User.objects.create(phonenum=phonenum, nickname=phonenum)
             Profile.objects.create(uid=user.id)
 
         # 通过 Session 记录用户登陆状态
+        # session 保存在服务器的什么位置: Django默认保存在数据库中, 配置在settings中的INSTALLED_APPS中
         request.session['uid'] = user.id
         return render_json(user.to_dict())
     else:
@@ -62,9 +64,11 @@ def submit(request):
 
 
 def show(request):
+    """获取用户交友信息"""
     uid = request.session.get('uid')
-    profile = Profile.objects.get(uid = uid)
-    return render_json(data = profile.to_dict())
+    # 直接用 id进行关联
+    profile, _ = Profile.objects.get_or_create(id=uid)
+    return render_json(data=profile.to_dict())
 
 
 def update(request):

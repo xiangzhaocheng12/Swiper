@@ -3,6 +3,7 @@ from django.db import models
 
 # Create your models here.
 class User(models.Model):
+    # 用户模型
     GENDERS = (
         ('male', '男性'),
         ('female', '女性'),
@@ -33,6 +34,14 @@ class User(models.Model):
     # small int   4 字节    32个二进制位    最大可以存储2^32 =
 
     # Mysql 也是可以保存二进制的数据: blob数据类型, 但是不建议使用
+    @property
+    def profile(self):
+        if not hasattr(self,'_profile'):
+            # get_or_create: Django 独有的, 获取, 没有的话就创建
+            # 返回两个值
+            self._profile, _ =  Profile.objects.get_or_create(id = self.id)
+        return self._profile
+
     def to_dict(self):
         return {
             'phonenum': self.phonenum,
@@ -45,30 +54,22 @@ class User(models.Model):
 
 
 class Profile(models.Model):
-    LOCATIONS = (
-        ('北京', '北京'),
-        ('上海', '上海'),
-        ('深圳', '深圳'),
-        ('武汉', '武汉'),
-        ('成都', '成都'),
-    )
-    GENDERS = (
-        ('male', '男性'),
-        ('female', '女性'),
-    )
     uid = models.IntegerField(default=0, unique=True, verbose_name='用户ID')
-    dating_location = models.CharField(default='上海', max_length=10, choices=LOCATIONS, verbose_name='⽬标城市')
-    dating_gender = models.CharField(default='male', max_length=10, choices=GENDERS, verbose_name='匹配的性别')
-    min_distance = models.FloatField(default=0, verbose_name='最⼩查找范围')
-    max_distance = models.FloatField(default=100, verbose_name='最⼤查找范围')
-    min_dating_age = models.IntegerField(default=19, verbose_name='最小交友年龄')
-    max_dating_age = models.IntegerField(default=30, verbose_name='最⼤交友年龄')
-    vibration = models.BooleanField(default=False, verbose_name='开启震动')
-    only_matched = models.BooleanField(default=False, verbose_name='不让陌⽣⼈看我的相册')
-    auto_play = models.BooleanField(default=False, verbose_name='⾃动播放视频')
+
+    dating_location = models.CharField(default='上海', max_length=10, choices=User.LOCATIONS, verbose_name='⽬标城市')
+    dating_gender = models.CharField(default='female', max_length=10, choices=User.GENDERS, verbose_name='匹配的性别')
+    min_distance = models.FloatField(default=1.0, verbose_name='最⼩查找范围')
+    max_distance = models.FloatField(default=10.0, verbose_name='最⼤查找范围')
+    min_dating_age = models.IntegerField(default=18, verbose_name='最小交友年龄')
+    max_dating_age = models.IntegerField(default=50, verbose_name='最⼤交友年龄')
+
+    vibration = models.BooleanField(default=False, verbose_name='是否开启震动')
+    only_matched = models.BooleanField(default=False, verbose_name='是否不让陌⽣⼈看我的相册')
+    auto_play = models.BooleanField(default=False, verbose_name='是否⾃动播放视频')
 
     def to_dict(self):
         return {
+            'id':self.id,
             'dating_location': self.dating_location,
             'dating_gender': self.dating_gender,
             'min_distance': self.min_distance,
@@ -79,5 +80,6 @@ class Profile(models.Model):
             'only_matched': self.only_matched,
             'auto_play': self.auto_play,
         }
+
     class Meta:
         db_table = 'profile'
