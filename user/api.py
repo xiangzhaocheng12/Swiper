@@ -53,7 +53,6 @@ def submit(request):
             # user.save()
             # 法2：
             user = User.objects.create(phonenum=phonenum, nickname=phonenum)
-            Profile.objects.create(uid=user.id)
 
         # 通过 Session 记录用户登陆状态
         # session 保存在服务器的什么位置: Django默认保存在数据库中, 配置在settings中的INSTALLED_APPS中

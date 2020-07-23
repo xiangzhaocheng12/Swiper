@@ -47,15 +47,13 @@ class User(models.Model):
             'phonenum': self.phonenum,
             'nickname': self.nickname,
             'gender': self.gender,
-            'birthday': self.birthday,
+            'birthday': str(self.birthday),
             'avatar': self.avatar,
             'location': self.location,
         }
 
 
 class Profile(models.Model):
-    uid = models.IntegerField(default=0, unique=True, verbose_name='用户ID')
-
     dating_location = models.CharField(default='上海', max_length=10, choices=User.LOCATIONS, verbose_name='⽬标城市')
     dating_gender = models.CharField(default='female', max_length=10, choices=User.GENDERS, verbose_name='匹配的性别')
     min_distance = models.FloatField(default=1.0, verbose_name='最⼩查找范围')
