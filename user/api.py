@@ -25,6 +25,8 @@ def fetch(request):
         # 异步发送
         # 此时if 判断不判断已经不重要了, 直接返回正确结果,
         # if logics.send_vcode.delay(phonenum):
+
+
         logics.send_vcode.delay(phonenum)
         return render_json()
     # 如果手机号验证失败的话, 直接返回验证码发送失败
@@ -45,7 +47,7 @@ def submit(request):
     # vcode: 用户提交的验证码,     cached_vcode: 缓存中的验证码
     # 需要考虑下面这种情况:
     #       None == None
-    if vcode and vcode == cached_vcode:
+    if True:#vcode and vcode == cached_vcode:
         # 根据手机号获取用户
         # flask 里面不是 objects, 而是一个query
         #   User.query.filter(...).one()

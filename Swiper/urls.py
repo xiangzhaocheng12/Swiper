@@ -18,6 +18,7 @@ from django.conf.urls import url, include
 import user
 from home import views
 from user.api import qn_token
+from social import apis as social_api
 
 urlpatterns = [
     # url(r'^admin/', admin.site.urls),
@@ -25,4 +26,12 @@ urlpatterns = [
     url(r'^api/user/', include('user.urls',namespace='user')),
     url(r'^qiniu/token/', user.api.qn_token),
     url(r'^qiniu/callback',user.api.qn_callback),
+
+    url(r'api/social/rcmd', social_api.rcmd),
+    url(r'api/social/like', social_api.like),
+    url(r'api/social/superlike', social_api.superlike),
+    url(r'api/social/dislike', social_api.dislike),
+    url(r'api/social/rewind', social_api.rewind),
+    url(r'api/social/fans', social_api.fans),
+    url(r'api/social/friends', social_api.friends),
 ]
