@@ -34,6 +34,7 @@ def send_vcode(phonenum):
 
     vcode = gen_randcode(6)  # 定义验证码
     time_str = '10分钟'
+    print('====================')
     print(vcode)
     # result = send_sms(phonenum, vcode,time_str)  # 发送验证码
     result = {'status':'success'}
