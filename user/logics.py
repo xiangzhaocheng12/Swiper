@@ -6,6 +6,7 @@ from django.core.cache import cache
 
 from libs.sms import send_sms
 from common.keys import VCODE_K
+from tasks import celery_app
 
 P_PHONENUM = re.compile(r'^1[3456789]\d{9}$')
 
@@ -21,7 +22,8 @@ def gen_randcode(length):
     chars = random.choices('012345678',k = length)
     return ''.join(chars)
 
-
+# 异步化进行发送
+@celery_app.task
 def send_vcode(phonenum):
     """向用户手机发送验证码"""
     key = VCODE_K % phonenum

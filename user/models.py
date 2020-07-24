@@ -56,6 +56,8 @@ class User(models.Model):
 class Profile(models.Model):
     dating_location = models.CharField(default='上海', max_length=10, choices=User.LOCATIONS, verbose_name='⽬标城市')
     dating_gender = models.CharField(default='female', max_length=10, choices=User.GENDERS, verbose_name='匹配的性别')
+    # 对于字段的顺序也需要注意:
+    #   清洗的时候如果定义的是 min_distance 方法的话, 则无法对 max_distance 进行清洗
     min_distance = models.FloatField(default=1.0, verbose_name='最⼩查找范围')
     max_distance = models.FloatField(default=10.0, verbose_name='最⼤查找范围')
     min_dating_age = models.IntegerField(default=18, verbose_name='最小交友年龄')

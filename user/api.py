@@ -1,22 +1,20 @@
-import json
-
 from django.core.cache import cache
 # 这个是自己写的 render返回函数, 用来代替原先的JsonResponse()
 from Swiper import config
 from libs import qn_cloud
 from libs.http_ import render_json
-
-# Create your views here.
 from common import keys
 from user import logics
 from user.forms import UserForm
 from user.forms import ProfileForm
 from user.models import User
 from user.models import Profile
-
 from common import stat
 
-
+# 客户端 -> 服务器
+#                   -> 短息平台 -> 运营商    过程很长, 需要进行等待, 对于用户不友好
+# 此时应该使用 Celery 异步任务处理框架
+# celery worker -A task_test(celery文件的名字) --loglevel=INFO  启动celery 的命令
 def fetch(request):
     """ 提交手机号 """
     # GET 是一个字典类型
@@ -24,7 +22,7 @@ def fetch(request):
     # 检查用户手机号是否正确
     if logics.is_phonenum(phonenum):
         # 如果手机号正确的话, 发送验证码, 判断是否发送成功
-        if logics.send_vcode(phonenum):
+        if logics.send_vcode.delay(phonenum):
             return render_json()
     # 如果手机号验证失败的话, 直接返回验证码发送失败
     return render_json(code=stat.SEND_FAILD)
