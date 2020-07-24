@@ -17,10 +17,12 @@ from django.conf.urls import url, include
 
 import user
 from home import views
+from user.api import qn_token
 
 urlpatterns = [
     # url(r'^admin/', admin.site.urls),
     url(r'^$',views.home),
     url(r'^api/user/', include('user.urls',namespace='user')),
     url(r'^qiniu/token/', user.api.qn_token),
+    url(r'^qiniu/callback',user.api.qn_callback),
 ]

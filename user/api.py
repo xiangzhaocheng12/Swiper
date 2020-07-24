@@ -2,13 +2,18 @@ import json
 
 from django.core.cache import cache
 # 这个是自己写的 render返回函数, 用来代替原先的JsonResponse()
-
+from Swiper import config
+from libs import qn_cloud
 from libs.http_ import render_json
 
 # Create your views here.
 from common import keys
 from user import logics
-from user.models import User, Profile
+from user.forms import UserForm
+from user.forms import ProfileForm
+from user.models import User
+from user.models import Profile
+
 from common import stat
 
 
@@ -71,25 +76,55 @@ def show(request):
 
 
 def update(request):
-    nickname = request.POST.get('nickname')
-    birthday = request.POST.get('birthday')
-    gender = request.POST.get('gender')
-    location = request.POST.get('location')
-    dating_gender = request.POST.get('dating_gender')
-    dating_location = request.POST.get('dating_location')
-    max_distance = request.POST.get('max_distance')
-    min_distance = request.POST.get('min_distance')
-    max_dating_age = request.POST.get('max_dating_age')
-    min_dating_age = request.POST.get('min_dating_age')
-    vibration = request.POST.get('vibration')
-    only_matched = request.POST.get('only_matched')
-    auto_play = request.POST.get('auto_play')
+    '''修改资料'''
+    # 从request.POST 里面得到一个类字典的对象
+    user_form = UserForm(request.POST)
+    profile_form = ProfileForm(request.POST)
+    # 如果两个提交的信息都没有问题的话:
+    if user_form.is_valid() and profile_form.is_valid():
 
-    data = {
-        "data": None
-    }
-    return render_json()
+        uid = request.session['uid']
+        # update `user` set nickname = 'xxx' ... where id = 123;
+
+        # UserForm.cleaned_data 是更新的数据, 并且需要进行拆包, 因为这个是一个字典
+        User.objects.filter(id=uid).update(**user_form.cleaned_data)
+
+        # 先更新, 如果没有数据可供更新的话, 创建一个新的并将 default 作为默认的写进去
+        Profile.objects.update_or_create(id=uid, defaults=profile_form.cleaned_data)
+        return render_json()
+    # 如果有异常的话:
+    else:
+        # 错误信息是用字典来标记的
+        err = {}
+        err.update(user_form.errors)
+        err.update(profile_form.errors)
+        return render_json(err, stat.PROFILE_ERR)
 
 
 def qn_token(request):
-    return render_json()
+    '''获取头像上传凭证'''
+    # 中间件里面已经设置了 request.uid = uid 了
+    # 这个是用户访问的, 用户访问之后返回一个 token
+    # 增加一个 Avatar, 用来表示头像, 为了将该用户账户上的头像和别的用户相区别
+    key = 'Avatar-%s' % request.uid  # 上传后的文件名
+    token = qn_cloud.get_token(request.uid,key)
+    return render_json({'key': key, 'token': token})
+
+
+def qn_callback(request):
+    '''七牛云回调'''
+    # 七牛云进行访问
+    uid = request.POST.get('uid')
+    key = request.POST.get('key')
+    avatar_url = '%s/%s' % (config.QN_HOST,key)
+    # 修改用户的头像地址
+    # 为什么这里需要用filter, 不能使用get来进行获取
+    # AttributeError: 'User' object has no attribute 'update'
+    # 法1：  使用 filter  对多个进行更改
+    # user = User.objects.filter(id = uid).update(avatar = avatar_url)
+    # 法2：  使用 get 对一个进行更改该
+    user = User.objects.get(id = uid)
+    user.avatar = avatar_url
+    user.save()
+    print(User.objects.filter(id = uid))
+    return render_json(data = avatar_url)

@@ -5,7 +5,7 @@
       <paths name="JiangCheng@39.106.162.75:22">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/JiangCheng/project/Swiper" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
