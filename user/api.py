@@ -22,8 +22,11 @@ def fetch(request):
     # 检查用户手机号是否正确
     if logics.is_phonenum(phonenum):
         # 如果手机号正确的话, 发送验证码, 判断是否发送成功
-        if logics.send_vcode.delay(phonenum):
-            return render_json()
+        # 异步发送
+        # 此时if 判断不判断已经不重要了, 直接返回正确结果,
+        # if logics.send_vcode.delay(phonenum):
+        logics.send_vcode.delay(phonenum)
+        return render_json()
     # 如果手机号验证失败的话, 直接返回验证码发送失败
     return render_json(code=stat.SEND_FAILD)
 

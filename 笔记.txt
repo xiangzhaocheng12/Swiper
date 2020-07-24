@@ -61,3 +61,15 @@ session
         ⑧ 客户端解析、渲染、呈现页面
 
 
+索引
+    哈希索引
+        底层使用的是哈希表, 通过哈希表上面一个槽的位置来进行匹配
+        时间复杂度: O(1)
+
+    select * from user where name like '张%';   # 此时可以使用索引
+    select * from user where name like '%张';   # 此时无法使用索引
+
+
+
+
+    B 树, B+树
