@@ -29,7 +29,7 @@ class Friend(models.Model):
     uid2 = models.IntegerField()
 
     class Meta:
-        unique_together = ('uid1', 'usid2')  # uid1 和 uid2 联合唯一
+        unique_together = ('uid1', 'uid2')  # uid1 和 uid2 联合唯一
 
     @classmethod
     def make_friends(cls, uid1, uid2):
@@ -39,5 +39,5 @@ class Friend(models.Model):
         # 排序法2:
         uid1, uid2 = sorted([uid1, uid2])  # 将uid 小的放在前面
         # 存在的话获取,不存在就创建一个
-        frd_relation,_ = cls.objects.get_or_create(uid1=uid1, uid2=uid2)
-        return frd_relation
+        frd_relation,if_created = cls.objects.get_or_create(uid1=uid1, uid2=uid2)
+        return if_created

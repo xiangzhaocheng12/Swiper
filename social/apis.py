@@ -18,15 +18,22 @@ def like(request):
     sid = int(request.POST.get('sid'))
     # 返回是否匹配的结果
     is_matched = logics.like_someone(request.uid,sid)
-    return render_json()
-
-
-def superlike(request):
-    pass
+    return render_json(data=is_matched)
 
 
 def dislike(request):
-    pass
+    '''不喜欢'''
+    sid = int(request.POST.get('sid'))
+    # 对用户进行匹配
+    logics.dislike_someone(request.uid,sid)
+    return render_json(data = None)
+
+def superlike(request):
+    '''超级喜欢'''
+    sid = int(request.POST.get('sid'))
+    # 返回是否匹配的结果
+    is_matched = logics.super_like_someone(request.uid,sid)
+    return render_json(data=is_matched)
 
 
 def rewind(request):
