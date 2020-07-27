@@ -1,6 +1,6 @@
 # HIGHEST_PROTOCOL 表示最高的协议 HIGHEST_PROTOCOL = 4,
 # 默认的协议版本是 3
-from pickle import dumps,loads,HIGHEST_PROTOCOL
+from pickle import dumps, loads, HIGHEST_PROTOCOL
 from pickle import UnpicklingError
 from redis import Redis as _Redis
 
@@ -9,6 +9,7 @@ from Swiper.config import REDIS
 
 class Redis(_Redis):
     '''带 pickle 处理的 Redis 类'''
+
     def set(self, name, value,
             # ex 表示指定一个过期时间, 单位是 秒
             # px 也表示指定一个过期时间, 单位是 毫秒
@@ -31,10 +32,10 @@ class Redis(_Redis):
         """
 
         # 将 value 序列化处理
-        pikled_value = dumps(value,HIGHEST_PROTOCOL)
-        return super().set(self, pikled_value,ex, px, nx, xx, keepttl)
+        pickled_value = dumps(value, HIGHEST_PROTOCOL)
+        return super().set(self, pickled_value, ex, px, nx, xx, keepttl)
 
-    def get(self, name,default = None):
+    def get(self, name, default=None):
         """
         Return the value at key ``name``, or None if the key doesn't exist
         """
@@ -48,6 +49,7 @@ class Redis(_Redis):
             return loads(picked_value)
         except UnpicklingError:
             return picked_value
+
 
 # 全局变量的单例模式, 每次
 rds = Redis(**REDIS)

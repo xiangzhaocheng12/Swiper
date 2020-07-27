@@ -14,3 +14,4 @@ celery_app.config_from_object(config)
 
 # 然后自动搜索django中定义的的任务
 celery_app.autodiscover_tasks()
+

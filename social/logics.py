@@ -15,6 +15,13 @@ def rcmd(uid):
     earliest_date = today - datetime.timedelta(my_profile.max_dating_age * 365)  # 最早出生日期
     lasted_birthday = today - datetime.timedelta(my_profile.min_dating_age * 365)  # 最晚出生日期
 
+
+    # 需要排除已经划过的人
+    # values_list() 用来取出指定的字段, flat  = True 表示
+    # 如果不使用 values_list()的话, 会取出所有的
+    # select sid from Swiped where uid=1002;
+    sid_list = Swiped.objects.filter(uid = uid).values_list('sid',flat = True)
+
     # 取出符合条件的用户
     # select * from xx limit 20;
     # select * from xx limit(20,30);
@@ -23,8 +30,9 @@ def rcmd(uid):
         gender=my_profile.dating_gender,
         birthday__gte=earliest_date,
         birthday__lte=lasted_birthday,
-    )[:20]  # 这里会转化成一个limit 语句
-    # TODO: 需要排除已经划过的人
+    # 排除所有带有滑动记录的 id
+    ).exclude(id__in=sid_list)[:20]  # 这里会转化成一个limit 语句
+
     return users
 
 
