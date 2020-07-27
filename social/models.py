@@ -24,7 +24,15 @@ class Swiped(models.Model):
     @classmethod
     def is_liked(cls,uid,sid):
         stypes = ['like','superlike']
-        return cls.objects.filter(uid = uid,sid = sid, stype__in=stypes).exists()
+        try:
+            # 查看自己是不是划过对方
+            swipe_record = cls.objects.get(uid = uid,sid = sid)
+        except cls.DoesNotExist:
+            return None     # 表示还没有滑动过对方
+        else:
+            # 喜欢返回True, 不喜欢返回False
+            return swipe_record.stype in stypes   # 为 True, 说明喜欢过, 为 False  说明不喜欢
+
 
 
 
