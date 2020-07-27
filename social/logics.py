@@ -2,7 +2,7 @@ import datetime
 
 from social.models import Swiped, Friend
 from user.models import Profile, User
-
+from django.db.utils import IntegrityError
 
 def rcmd(uid):
     '''推荐滑动用户'''
@@ -28,9 +28,17 @@ def rcmd(uid):
 def like_someone(uid, sid):
     '''喜欢(右划)某人'''
     # 1. 在数据库中添加滑动记录
-    Swiped.objects.update_or_create(uid = uid,sid = sid,stype = 'like')
+    try:
+        Swiped.objects.create(uid = uid,sid = sid,stype = 'like')
+    #
+    except IntegrityError:
+        # 重复滑动时, 直接返回当前用户是否已匹配成好友
+        return Friend.is_friends(uid,sid)
+
     # 2. 检查对方是否右划或者上划过自己
-    if Swiped.objects.filter(uid = sid).filter(sid = uid).filter(stype__in = ['like','superlike']):
+        # 这里的uid  和  sid 需要换一下位置
+    # if Swiped.objects.filter(uid = sid).filter(sid = uid).filter(stype__in = ['like','superlike']):
+    if Swiped.is_liked(sid,uid):
     # 3.如果双方互相喜欢的话, 匹配成好友
         Friend.make_friends(uid, sid)
         return True

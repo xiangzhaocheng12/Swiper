@@ -1,4 +1,4 @@
-from django.core.cache import cache
+from libs.cache import rds
 # 这个是自己写的 render返回函数, 用来代替原先的JsonResponse()
 from Swiper import config
 from libs import qn_cloud
@@ -25,8 +25,6 @@ def fetch(request):
         # 异步发送
         # 此时if 判断不判断已经不重要了, 直接返回正确结果,
         # if logics.send_vcode.delay(phonenum):
-
-
         logics.send_vcode.delay(phonenum)
         return render_json()
     # 如果手机号验证失败的话, 直接返回验证码发送失败
@@ -41,7 +39,7 @@ def submit(request):
 
     # 从缓存获取验证码
     key = keys.VCODE_K % phonenum
-    cached_vcode = cache.get(key)
+    cached_vcode = rds.get(key)
 
     # 检查验证码
     # vcode: 用户提交的验证码,     cached_vcode: 缓存中的验证码

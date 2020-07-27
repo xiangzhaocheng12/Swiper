@@ -21,6 +21,12 @@ class Swiped(models.Model):
     class Meta:
         unique_together = ('uid', 'sid')  #
 
+    @classmethod
+    def is_liked(cls,uid,sid):
+        stypes = ['like','superlike']
+        return cls.objects.filter(uid = uid,sid = sid, stype__in=stypes).exists()
+
+
 
 class Friend(models.Model):
     # 通过程序本身, ID 小的为第一条字段, ID大的放在后面
@@ -41,3 +47,10 @@ class Friend(models.Model):
         # 存在的话获取,不存在就创建一个
         frd_relation,if_created = cls.objects.get_or_create(uid1=uid1, uid2=uid2)
         return if_created
+
+    @classmethod
+    def is_friends(cls, uid1,uid2):
+        '''检查两个人是否时好友'''
+        uid1, uid2 = sorted([uid1, uid2])  # 将uid 小的放在前面
+        # 是否存在
+        return cls.objects.filter(uid1=uid1,uid2 = uid2).exists()
