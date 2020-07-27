@@ -1,9 +1,12 @@
 import datetime
 
+from django.db.transaction import atomic
+
 from common import keys
 from libs.cache import rds
 from social.models import Swiped, Friend
 from user.models import Profile, User
+# 导入异常
 from django.db.utils import IntegrityError
 
 
@@ -61,7 +64,7 @@ def like_someone(uid, sid):
     # 1. 在数据库中添加滑动记录
     try:
         Swiped.objects.create(uid=uid, sid=sid, stype='like')
-    #
+    # 前端的重复滑动:
     except IntegrityError:
         # 重复滑动时, 直接返回当前用户是否已匹配成好友
         return Friend.is_friends(uid, sid)
@@ -76,7 +79,8 @@ def like_someone(uid, sid):
         # 3.如果双方互相喜欢的话, 匹配成好友
         Friend.make_friends(uid, sid)
         return True
-    return False
+    else:
+        return False
 
 
 def dis_someone(uid, sid):
@@ -129,3 +133,63 @@ def dislike_someone(uid, sid):
 
     # 强制将对方从自己的优先推荐队列删除
     rds.lrem(keys.FIRST_RCMD_Q % uid, 0, sid)
+
+
+def find_fans(uid):
+    '''
+    查找自己的粉丝, 自己尚未划过, 但是对方喜欢过自己的人
+    :param uid:
+    :return:
+    '''
+    # 取出已划过的用户 ID 列表
+    sid_list = Swiped.objects.filter(uid=uid).values_list('sid', flat=True)
+
+    like_types = ['like', 'superlike']
+    fans_id_list = \
+        Swiped.objects.filter(sid=uid, stype__in=like_types). \
+            exclude(uid__in=sid_list). \
+            values_list('uid', flat=True)  # 然后取出对方的id
+    return User.objects.filter(id__in=fans_id_list)
+
+
+def rewind_last_swipe(uid):
+    '''
+    反悔最后一次滑动的记录(确定逻辑顺序):
+    :param uid: 用户的 ID
+    :return:
+    '''
+    # 1.检查今天是否已经达到3次
+    #   还需要拼接一个时间, 确保删除的次数是当天的
+    now = datetime.datetime.now()
+    key = 'Rewind-%s-%s' % (uid, now.date())
+    # 取出当天反悔的次数, 默认为0
+    rewind_times = rds.get(key, 0)
+    if rewind_times >= 3:
+        print('反悔次数达到限制')
+        return 1007  # TODO: 需要给前端反回状态码
+
+    # 2.从数据库里面取出最后一次滑动的记录
+    latest_swiped = Swiped.objects.filter(uid=uid).latest('stime')
+
+    # 3.检查反悔记录是否是五分钟以内的
+    past_time = now - latest_swiped.stime
+    if past_time.seconds > 300:
+        print('反悔超时')
+        return 1008  # TODO: 需要给前端反回状态码
+
+    # 给下面操作数据库的代码添加事务:
+    with atomic():
+        # 4.检查上次滑动记录是否匹配成功, 如果匹配成功的话, 需要删除好友
+        #       不管之前有没有, 都来一次删除, 强删的话是不会报错的
+        if latest_swiped.stype in ['like','superlike']:
+            Friend.break_off(uid,latest_swiped.sid)
+
+        # 5.检查上次是否是超级喜欢, 如果是, 将自己的ID从对方的优先队列中删除
+        if latest_swiped.stype == 'superlike':
+            # 把对方优先队列中自己的记录给删除
+            rds.lrem(keys.FIRST_RCMD_Q %latest_swiped.sid,0,uid)
+        # 6.删除滑动记录
+        latest_swiped.delete()
+
+        # 7. 累加当天反悔次数
+        rds.set(key,rewind_times + 1)

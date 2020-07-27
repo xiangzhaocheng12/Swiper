@@ -44,12 +44,14 @@ class Redis(_Redis):
         # 如果picked_value 是空的话,返回默认值
         if picked_value is None:
             return default
-        # 如果loads 的值可以直接序列化, 那么
+        # 如果loads 的值可以直接序列化, 那么直接返回,
+        # 如果不能直接反序列化, 捕获 UnpicklingError 这个异常
         try:
             return loads(picked_value)
         except UnpicklingError:
             return picked_value
 
 
-# 全局变量的单例模式, 每次
-rds = Redis(**REDIS)
+# 全局变量的单例模式:
+# 只在模块里面创建了一次, 而不会每次引用的时候都去创建
+rds = Redis(**REDIS)    # REDIS 写在了 config 配置文件里面

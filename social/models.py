@@ -26,6 +26,7 @@ class Swiped(models.Model):
 
     @classmethod
     def is_liked(cls,uid,sid):
+        '''检查是否喜欢过某人'''
         stypes = ['like','superlike']
         try:
             # 查看自己是不是划过对方
@@ -59,6 +60,7 @@ class Friend(models.Model):
         frd_relation,if_created = cls.objects.get_or_create(uid1=uid1, uid2=uid2)
         return if_created
 
+    # 检查是否是你的好友, 用作重复滑动时返回是否有好友这条记录
     @classmethod
     def is_friends(cls, uid1,uid2):
         '''检查两个人是否时好友'''
@@ -79,3 +81,9 @@ class Friend(models.Model):
             else:
                 frd_id_list.append(frd.uid1)
         return User.objects.filter(id__in = frd_id_list)
+
+    @classmethod
+    def break_off(cls,uid1,uid2):
+        # 还是要先排序
+        uid1, uid2 = sorted([uid1, uid2])
+        cls.objects.filter(uid1 = uid1, uid2 = uid2).delete()

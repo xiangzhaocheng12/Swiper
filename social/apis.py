@@ -39,12 +39,17 @@ def superlike(request):
 
 def rewind(request):
     '''反悔'''
-    pass
+    # 能不依赖前端, 就尽量不依赖前端
+    logics.rewind_last_swipe(request.uid)
+    return render_json()
 
 
-def fans(request):
+def show_fans(request):
     '''查看粉丝'''
-    pass
+    # 超级特权的一个接口
+    fans = logics.find_fans(request.uid)
+    result = [user.to_dict() for user in fans]
+    return render_json(result)
 
 
 def friends(request):
