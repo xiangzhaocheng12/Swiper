@@ -3,6 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from libs.http_ import render_json
 from social import logics
+from social.models import Friend
 
 
 def rcmd(request):
@@ -37,12 +38,18 @@ def superlike(request):
 
 
 def rewind(request):
+    '''反悔'''
     pass
 
 
 def fans(request):
+    '''查看粉丝'''
     pass
 
 
 def friends(request):
-    pass
+    '''查看好友'''
+    friends = Friend.my_friends(request.uid)
+    # 类似前面的方式把结果弄出来 列表里面包着多个字典
+    result = [frd.to_dict() for frd in friends]
+    return render_json(data = result)

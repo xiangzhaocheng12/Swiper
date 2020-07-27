@@ -2,6 +2,9 @@ from django.db import models
 
 
 # Create your models here.
+from django.db.models import Q
+from user.models import User
+
 
 class Swiped(models.Model):
     '''滑动记录'''
@@ -62,3 +65,17 @@ class Friend(models.Model):
         uid1, uid2 = sorted([uid1, uid2])  # 将uid 小的放在前面
         # 是否存在
         return cls.objects.filter(uid1=uid1,uid2 = uid2).exists()
+
+    # 查看好友的接口
+    @classmethod
+    def my_friends(cls,uid):
+        '''我所有好友 ID 列表'''
+        frd_id_list = []
+        condition = Q(uid1 = uid) | Q(uid2 = uid)
+
+        for frd in cls.objects.filter(condition):
+            if frd.uid1 == uid:
+                frd_id_list.append(frd.uid2)
+            else:
+                frd_id_list.append(frd.uid1)
+        return User.objects.filter(id__in = frd_id_list)
