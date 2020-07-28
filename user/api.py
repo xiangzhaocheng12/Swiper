@@ -28,7 +28,9 @@ def fetch(request):
         logics.send_vcode.delay(phonenum)
         return render_json()
     # 如果手机号验证失败的话, 直接返回验证码发送失败
-    return render_json(code=stat.SEND_FAILD)
+    # return render_json(code=stat.SendFaild)
+    # 使用中间件捕获抛出的异常
+    raise stat.SendFaild
 
 
 def submit(request):
@@ -65,7 +67,9 @@ def submit(request):
         request.session['uid'] = user.id
         return render_json(user.to_dict())
     else:
-        return render_json(code=stat.VCODE_ERR)
+        # return render_json(code=stat.VcodeErr)
+        # 这里也通过中间件捕获异常
+        raise stat.VcodeErr
 
 
 def show(request):
@@ -99,7 +103,8 @@ def update(request):
         err = {}
         err.update(user_form.errors)
         err.update(profile_form.errors)
-        return render_json(err, stat.PROFILE_ERR)
+        # return render_json(err, stat.ProfileErr)
+        raise stat.ProfileErr(err)
 
 
 def qn_token(request):

@@ -1,7 +1,7 @@
 import datetime
 
 from django.db.transaction import atomic
-
+from common import stat
 from common import keys
 from libs.cache import rds
 from social.models import Swiped, Friend
@@ -159,14 +159,16 @@ def rewind_last_swipe(uid):
     :return:
     '''
     # 1.检查今天是否已经达到3次
-    #   还需要拼接一个时间, 确保删除的次数是当天的
+    #   还需要拼接一个时间, 确保删除的次数是当天的, 避免时间跨界的问题
     now = datetime.datetime.now()
     key = 'Rewind-%s-%s' % (uid, now.date())
     # 取出当天反悔的次数, 默认为0
     rewind_times = rds.get(key, 0)
     if rewind_times >= 3:
         print('反悔次数达到限制')
-        return 1007  # TODO: 需要给前端反回状态码
+        # 此时直接跳出去, 就不需要再进行后面的操作了
+        raise stat.RewindLimited
+        # return 1007  # TODO: 需要给前端反回状态码
 
     # 2.从数据库里面取出最后一次滑动的记录
     latest_swiped = Swiped.objects.filter(uid=uid).latest('stime')
@@ -175,7 +177,8 @@ def rewind_last_swipe(uid):
     past_time = now - latest_swiped.stime
     if past_time.seconds > 300:
         print('反悔超时')
-        return 1008  # TODO: 需要给前端反回状态码
+        raise stat.RewindTimeout
+        # return 1008  # TODO: 需要给前端反回状态码
 
     # 给下面操作数据库的代码添加事务:
     with atomic():

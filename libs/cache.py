@@ -33,6 +33,7 @@ class Redis(_Redis):
 
         # 将 value 序列化处理
         pickled_value = dumps(value, HIGHEST_PROTOCOL)
+        # 这里操作的就是字符串
         return super().set(name, pickled_value, ex, px, nx, xx, keepttl)
 
     def get(self, name, default=None):
