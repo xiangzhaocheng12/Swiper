@@ -1,4 +1,4 @@
-from django.core.cache import cache
+from libs.cache import rds
 # 这个是自己写的 render返回函数, 用来代替原先的JsonResponse()
 from Swiper import config
 from libs import qn_cloud
@@ -25,12 +25,12 @@ def fetch(request):
         # 异步发送
         # 此时if 判断不判断已经不重要了, 直接返回正确结果,
         # if logics.send_vcode.delay(phonenum):
-
-
         logics.send_vcode.delay(phonenum)
         return render_json()
     # 如果手机号验证失败的话, 直接返回验证码发送失败
-    return render_json(code=stat.SEND_FAILD)
+    # return render_json(code=stat.SendFaild)
+    # 使用中间件捕获抛出的异常
+    raise stat.SendFaild
 
 
 def submit(request):
@@ -41,13 +41,13 @@ def submit(request):
 
     # 从缓存获取验证码
     key = keys.VCODE_K % phonenum
-    cached_vcode = cache.get(key)
+    cached_vcode = rds.get(key)
 
     # 检查验证码
     # vcode: 用户提交的验证码,     cached_vcode: 缓存中的验证码
     # 需要考虑下面这种情况:
     #       None == None
-    if True:#vcode and vcode == cached_vcode:
+    if True:# vcode and vcode == cached_vcode:
         # 根据手机号获取用户
         # flask 里面不是 objects, 而是一个query
         #   User.query.filter(...).one()
@@ -67,7 +67,9 @@ def submit(request):
         request.session['uid'] = user.id
         return render_json(user.to_dict())
     else:
-        return render_json(code=stat.VCODE_ERR)
+        # return render_json(code=stat.VcodeErr)
+        # 这里也通过中间件捕获异常
+        raise stat.VcodeErr
 
 
 def show(request):
@@ -101,7 +103,8 @@ def update(request):
         err = {}
         err.update(user_form.errors)
         err.update(profile_form.errors)
-        return render_json(err, stat.PROFILE_ERR)
+        # return render_json(err, stat.ProfileErr)
+        raise stat.ProfileErr(err)
 
 
 def qn_token(request):

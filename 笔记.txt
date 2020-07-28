@@ -83,3 +83,79 @@ session
 维度 -90 ~ 90
 
 GEO Hash : 精度不高, 模糊匹配的方式
+
+
+--------------------------------------------
+Day06:
+git
+    branch
+    master
+    develop
+    feature
+
+    pull request -> 代码审核(新人如果三次代码审核都不行, 基本上就凉了)
+user
+    发短信(跟第三方平台的对接, 关键是看平台的接口文档, Celery异步[还可以做定时])
+    登陆(中间件、session、Django 源码)
+    查看交友资料信息(user表和profile表一对一的关系、外键、property)
+    修改个人信息(Form、ModelForm)
+    七牛云
+        1. 客户端 -> 服务器, 获取 token
+        2. 客户端 -> 七牛云: 携带 Token 上传头像
+        3. 七牛云 -> 访问服务器:七牛云的回调(回调服务器, 服务器保存结构)
+        4. 七牛云 -> 客户端:通知客户端上传成功
+social
+    推荐:
+        1. 创建机器人: 独立脚本如何调用 Django 项目中的模块
+        2. Django ORM
+        3. 企业中的一些推荐
+    '喜欢'接口:联合唯一, 联合主键(底层使用的都是联合唯一的索引来操作的)
+        class Meta:
+            unique_together = ('uid', 'sid')
+
+        联合唯一
+        create table swiped(
+            uid int,
+            sid int,
+            unique(uid,sid)
+        )
+        联合主键
+        create table swipped(
+            uid it,
+            sid int,
+            primary key (uid, sid),
+        )
+
+
+python 垃圾会回收机制
+- 引用计数
+- 标记清除
+- 分代收集
+
+- - 引用计数:
+a = 1234567
+b = a
+    python 会针对每个变量进行记录, 当前的引用计数会减一
+del b   # 此时该变量会减少 1
+
+- - 引用计数所不能回收的:
+a = [1,2,3]
+b = [3,2,1]
+a.append(a)
+b.append(a)    # 循环引用无法进行清除, 需要使用标记清除的方式
+
+- - 分代收集:
+
+装饰器:
+def foo(func1):
+    def wrapper(*args,**kwargs):
+
+        return
+    return
+
+服务器的内存查看：
+    top/htop/free
+
+Linux 的五个命令:
+    ps      grep    scp     chmod   chown
+

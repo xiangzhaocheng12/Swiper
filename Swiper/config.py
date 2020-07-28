@@ -1,5 +1,12 @@
 """程序配置, 及第三方平台配置"""
 
+# REDIS 配置
+REDIS = {
+    'host' : 'localhost',
+    'port':6379,
+    'db':1
+}
+
 # 赛迪云通讯配置
 SD_API = 'https://api.mysubmail.com/message/xsend'
 SD_APPID = '52461'
@@ -13,3 +20,4 @@ QN_ACCESS_KEY = 'xyygwQt93gauu3AVm0mfp6h2Kx0IyKKwaNLbEtVA'
 QN_SECRET_KEY = 'Sga-AuSyUHIqul-IhFpFnxZd2uCSDkYeQJfDItKd'
 QN_BUCKET = 'swiper-jiang-cheng-north'
 QN_TIMEOUT = 600
+

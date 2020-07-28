@@ -44,6 +44,7 @@ class User(models.Model):
 
     def to_dict(self):
         return {
+            'id':self.id,
             'phonenum': self.phonenum,
             'nickname': self.nickname,
             'gender': self.gender,
