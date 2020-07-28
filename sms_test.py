@@ -1,5 +1,8 @@
+"""
+    如果必须的参数都给全了, 还是返回错误提示,
+    那么就把非必须参数都写进去
+"""
 import time
-
 import requests
 import json
 import hashlib

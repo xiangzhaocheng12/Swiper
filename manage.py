@@ -3,6 +3,7 @@ import os
 import sys
 
 if __name__ == "__main__":
+    # 设置环境变量模块, 标记环境变量在哪里
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Swiper.settings")
     try:
         from django.core.management import execute_from_command_line
@@ -19,4 +20,5 @@ if __name__ == "__main__":
                 "forget to activate a virtual environment?"
             )
         raise
+    # 从命令行加载
     execute_from_command_line(sys.argv)

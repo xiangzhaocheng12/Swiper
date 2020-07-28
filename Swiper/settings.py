@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -31,17 +33,19 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    # 'django.contrib.admin',
-    # 'django.contrib.auth',
     'django.contrib.contenttypes',
+    # session 就在这里进行配置的
     'django.contrib.sessions',
-    # 'django.contrib.messages',
     'django.contrib.staticfiles',
+    'user',
+    'social'
 ]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # 放在 session 的后面
+    'common.middleware.AuthMiddleware',
+    'common.middleware.LogicErrMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     # 'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -83,6 +87,8 @@ DATABASES = {
         'USER': 'JiangCheng',
         'PASSWORD':'ZhaoCheng1!',
     }
+    # 这里还可以添加一个 AUTO_REQUEST (具体名字没太记清楚),
+    # 表示每次操作数据库的时候都会加上事务, 较为方便, 但是不推荐使用
 }
 
 
@@ -127,3 +133,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR,'static'),
 ]
+
+# APPEND_SLASH=False
