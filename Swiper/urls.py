@@ -17,15 +17,15 @@ from django.conf.urls import url, include
 
 import user
 from home import views
-from user.api import qn_token
+from user.apis import qn_token
 from social import apis as social_api
 
 urlpatterns = [
     # url(r'^admin/', admin.site.urls),
     url(r'^$',views.home),
     url(r'^api/user/', include('user.urls',namespace='user')),
-    url(r'^qiniu/token/', user.api.qn_token),
-    url(r'^qiniu/callback',user.api.qn_callback),
+    url(r'^qiniu/token/', user.apis.qn_token),
+    url(r'^qiniu/callback', user.apis.qn_callback),
 
     url(r'^api/social/rcmd', social_api.rcmd),
     url(r'^api/social/like', social_api.like),

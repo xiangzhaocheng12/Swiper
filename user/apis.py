@@ -1,3 +1,4 @@
+import logging
 from libs.cache import rds
 # 这个是自己写的 render返回函数, 用来代替原先的JsonResponse()
 from Swiper import config
@@ -10,6 +11,11 @@ from user.forms import ProfileForm
 from user.models import User
 from user.models import Profile
 from common import stat
+
+# 这个本质上是一个单例模式
+# django 中的日志:
+# 此时可以用 grep -rnw print ./ --include='*.py' 来查找项目中有什么 带 print 的语句
+inf_logger = logging.getLogger('inf')
 
 # 客户端 -> 服务器
 #                   -> 短息平台 -> 运营商    过程很长, 需要进行等待, 对于用户不友好
@@ -54,6 +60,7 @@ def submit(request):
         # get:只能获取一个
         try:
             user = User.objects.get(phonenum=phonenum)
+            inf_logger.info(f'{user.id} login')
         # 这里不能只写一个except, 需要精确的写上一个异常
         except User.DoesNotExist:
             # user = User()
@@ -61,7 +68,7 @@ def submit(request):
             # user.save()
             # 法2：
             user = User.objects.create(phonenum=phonenum, nickname=phonenum)
-
+            inf_logger.info(f'{user.id} register')
         # 通过 Session 记录用户登陆状态
         # session 保存在服务器的什么位置: Django默认保存在数据库中, 配置在settings中的INSTALLED_APPS中
         request.session['uid'] = user.id

@@ -12,9 +12,10 @@ class Vip(models.Model):
     def has_perm(self, perm_name):
         '''检查当前Vip 是否具有某权限'''
         # 取出权限表里面的ID
-        perm_id = Permission.objects.get(name=perm_name)
+        perm_id = Permission.objects.get(name=perm_name).id
         return VipPermRelation.objects.filter(vip_level=self.level,
-                                              perm_id=perm_id)
+                                              perm_id=perm_id).exists()
+
 
 
 class Permission(models.Model):

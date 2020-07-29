@@ -60,6 +60,7 @@ class User(models.Model):
         if not hasattr(self, '_vip'):
             # 这里必须要取得出值, 因为每个用户都有它的 VIP 等级
             self._vip = Vip.objects.get(id=self.vip_id)
+            # 这个 _vip 是 Vip 表中的一个对象
         return self._vip
 
     def set_vip(self, vip_id):

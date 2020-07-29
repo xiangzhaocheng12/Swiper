@@ -1,7 +1,9 @@
 from django.utils.deprecation import MiddlewareMixin
-
 from libs.http_ import render_json
 from common import stat
+import logging
+
+err_log = logging.getLogger('err')
 
 
 class AuthMiddleware(MiddlewareMixin):
@@ -38,6 +40,7 @@ class LogicErrMiddleware(MiddlewareMixin):
         # 此时必须是逻辑异常的时候, 才进行处理, 如果是别的异常, 不去做处理
         if isinstance(err, stat.LogicErr):
             # 反回的data 是错误信息的类
+            err_log.error(f'LogicErr: {err.data},({err.code})')
             return render_json(err.data, code=err.code)
 
 # try:

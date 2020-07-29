@@ -1,6 +1,6 @@
 import re
 import random
-
+import logging
 # 先编译一些
 # 全都换成自己重写的 redis
 from libs.cache import rds
@@ -9,6 +9,7 @@ from libs.sms import send_sms
 from common.keys import VCODE_K
 from tasks import celery_app
 
+inf_logger = logging.getLogger('inf')
 P_PHONENUM = re.compile(r'^1[3456789]\d{9}$')
 
 
@@ -43,6 +44,7 @@ def send_vcode(phonenum):
         # 这个是一个本地内存,不是一个通用的内存
         # 需要引入 Redis 到 Django 中
         rds.set(key, vcode, 900)  # 多为用户保留五分钟
+        inf_logger.debug('vcode:%s' %vcode)
         return True
     else:
         return False
