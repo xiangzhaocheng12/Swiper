@@ -88,6 +88,9 @@ def show(request):
     key = PROFILE_K % uid
     # 先从缓存里面获取
     profile = rds.get(key)
+    # 但是此时如果每个接口都需要这样子写一个缓存的操作, 是不是代码十分冗余 ?
+    # 是否可以改造django的源码, 对 User.object.get()、 User.object.create()、User.object.save()
+    # 来进行添加缓存。
     inf_logger.debug('从缓存获取数据:%s' % profile)
     if not profile:
         inf_logger.debug('从数据库获取数据:%s' % profile)
