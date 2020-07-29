@@ -1,4 +1,6 @@
 import logging
+
+from common.keys import PROFILE_K
 from libs.cache import rds
 # 这个是自己写的 render返回函数, 用来代替原先的JsonResponse()
 from Swiper import config
@@ -16,6 +18,7 @@ from common import stat
 # django 中的日志:
 # 此时可以用 grep -rnw print ./ --include='*.py' 来查找项目中有什么 带 print 的语句
 inf_logger = logging.getLogger('inf')
+
 
 # 客户端 -> 服务器
 #                   -> 短息平台 -> 运营商    过程很长, 需要进行等待, 对于用户不友好
@@ -53,7 +56,7 @@ def submit(request):
     # vcode: 用户提交的验证码,     cached_vcode: 缓存中的验证码
     # 需要考虑下面这种情况:
     #       None == None
-    if True:# vcode and vcode == cached_vcode:
+    if True:  # vcode and vcode == cached_vcode:
         # 根据手机号获取用户
         # flask 里面不是 objects, 而是一个query
         #   User.query.filter(...).one()
@@ -82,8 +85,18 @@ def submit(request):
 def show(request):
     """获取用户交友信息"""
     uid = request.session.get('uid')
-    # 直接用 id进行关联
-    profile, _ = Profile.objects.get_or_create(id=uid)
+    key = PROFILE_K % uid
+    # 先从缓存里面获取
+    profile = rds.get(key)
+    inf_logger.debug('从缓存获取数据:%s' % profile)
+    if not profile:
+        inf_logger.debug('从数据库获取数据:%s' % profile)
+        # 直接用 id进行关联,
+        # 从数据库获取数据
+        profile, _ = Profile.objects.get_or_create(id=uid)
+        inf_logger.debug('将数据写入缓存')
+        # 从数据库中拿到数据后,写入缓存(此时rds 已经经过了pickle 处理了)
+        rds.set(key, profile)
     return render_json(data=profile.to_dict())
 
 
@@ -103,6 +116,10 @@ def update(request):
 
         # 先更新, 如果没有数据可供更新的话, 创建一个新的并将 default 作为默认的写进去
         Profile.objects.update_or_create(id=uid, defaults=profile_form.cleaned_data)
+
+        # 清除旧缓存
+        key = PROFILE_K % uid
+        rds.delete(key)
         return render_json()
     # 如果有异常的话:
     else:
@@ -120,7 +137,7 @@ def qn_token(request):
     # 这个是用户访问的, 用户访问之后返回一个 token
     # 增加一个 Avatar, 用来表示头像, 为了将该用户账户上的头像和别的用户相区别
     key = 'Avatar-%s' % request.uid  # 上传后的文件名
-    token = qn_cloud.get_token(request.uid,key)
+    token = qn_cloud.get_token(request.uid, key)
     return render_json({'key': key, 'token': token})
 
 
@@ -129,15 +146,15 @@ def qn_callback(request):
     # 七牛云进行访问
     uid = request.POST.get('uid')
     key = request.POST.get('key')
-    avatar_url = '%s/%s' % (config.QN_HOST,key)
+    avatar_url = '%s/%s' % (config.QN_HOST, key)
     # 修改用户的头像地址
     # 为什么这里需要用filter, 不能使用get来进行获取
     # AttributeError: 'User' object has no attribute 'update'
     # 法1：  使用 filter  对多个进行更改
     # user = User.objects.filter(id = uid).update(avatar = avatar_url)
     # 法2：  使用 get 对一个进行更改该
-    user = User.objects.get(id = uid)
+    user = User.objects.get(id=uid)
     user.avatar = avatar_url
     user.save()
-    print(User.objects.filter(id = uid))
-    return render_json(data = avatar_url)
+    print(User.objects.filter(id=uid))
+    return render_json(data=avatar_url)
