@@ -1,7 +1,11 @@
+import datetime
+
 from django.db import models
 
-
 # Create your models here.
+from vip.models import Vip
+
+
 class User(models.Model):
     # 用户模型
     GENDERS = (
@@ -29,6 +33,9 @@ class User(models.Model):
     avatar = models.CharField(max_length=256, verbose_name='个人形象 URL')
     location = models.CharField(max_length=10, choices=LOCATIONS, default='上海', verbose_name='常居地')
 
+    vip_id = models.IntegerField(default=1, verbose_name='用户的VIP ID')
+    vip_end = models.DateTimeField(default='3000-01-01', verbose_name='VIP 截止日期')
+
     # 各种的 int 大小
     # tiny int    1 字节    8个二进制位     最大可以存储2^8 = 255
     # small int   4 字节    32个二进制位    最大可以存储2^32 =
@@ -36,15 +43,38 @@ class User(models.Model):
     # Mysql 也是可以保存二进制的数据: blob数据类型, 但是不建议使用
     @property
     def profile(self):
-        if not hasattr(self,'_profile'):
+        if not hasattr(self, '_profile'):
             # get_or_create: Django 独有的, 获取, 没有的话就创建
             # 返回两个值
-            self._profile, _ =  Profile.objects.get_or_create(id = self.id)
+            self._profile, _ = Profile.objects.get_or_create(id=self.id)
         return self._profile
+
+    @property
+    def vip(self):
+        '''用户的VIP数据'''
+        now = datetime.datetime.now()
+        if now >= self.vip_end:
+            # 如果超过了时间, 设置vip等级为1
+            self.set_vip(1)
+        # 判断是否有 _vip 这个属性
+        if not hasattr(self, '_vip'):
+            # 这里必须要取得出值, 因为每个用户都有它的 VIP 等级
+            self._vip = Vip.objects.get(id=self.vip_id)
+        return self._vip
+
+    def set_vip(self, vip_id):
+        '''设置用户的VIP'''
+        # 获取当前传入vip_id 的 Vip 对象
+        self._vip = Vip.objects.get(id=vip_id)
+        # 保留传入的 vip_id
+        self.vip_id = vip_id
+        # 当前user的vip_end  = 当前时间 + 该vip的持续时长
+        self.vip_end = datetime.datetime.now() + datetime.timedelta(self._vip.duration)
+        self.save()
 
     def to_dict(self):
         return {
-            'id':self.id,
+            'id': self.id,
             'phonenum': self.phonenum,
             'nickname': self.nickname,
             'gender': self.gender,
@@ -70,7 +100,7 @@ class Profile(models.Model):
 
     def to_dict(self):
         return {
-            'id':self.id,
+            'id': self.id,
             'dating_location': self.dating_location,
             'dating_gender': self.dating_gender,
             'min_distance': self.min_distance,

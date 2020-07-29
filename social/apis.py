@@ -4,6 +4,7 @@ from django.shortcuts import render
 from libs.http_ import render_json
 from social import logics
 from social.models import Friend
+from vip.logics import require_perm
 
 
 def rcmd(request):
@@ -28,7 +29,7 @@ def dislike(request):
     # 对用户进行匹配
     logics.dislike_someone(request.uid,sid)
     return render_json(data = None)
-
+require_perm('superlike')
 def superlike(request):
     '''超级喜欢'''
     sid = int(request.POST.get('sid'))
@@ -36,14 +37,14 @@ def superlike(request):
     is_matched = logics.super_like_someone(request.uid,sid)
     return render_json(data=is_matched)
 
-
+require_perm('rewind')
 def rewind(request):
     '''反悔'''
     # 能不依赖前端, 就尽量不依赖前端
     logics.rewind_last_swipe(request.uid)
     return render_json()
 
-
+require_perm('show_fans')
 def show_fans(request):
     '''查看粉丝'''
     # 超级特权的一个接口

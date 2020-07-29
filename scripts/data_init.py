@@ -4,10 +4,11 @@ import os
 import sys
 import random
 from datetime import date
-
 import django
 
 # 将项目文件夹的绝对路径插入到 sys.path
+# from vip.models import VipPermRelation, Vip,Permission
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 # 设置 DJANGO_SETTINGS_MODULE 环境变量
@@ -16,7 +17,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Swiper.settings')
 django.setup()
 
 from user.models import User
-# from vip.models import Vip, Permission, VipPermRelation
+from vip.models import Vip, Permission, VipPermRelation
 
 
 last_names = (

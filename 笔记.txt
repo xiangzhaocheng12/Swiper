@@ -159,3 +159,34 @@ def foo(func1):
 Linux 的五个命令:
     ps      grep    scp     chmod   chown
 
+1. 查看CUP负载
+top 命令:
+    top - 14:15:11 up 142 days, 20:33,  6 users,  load average: 6.19, 4.39, 3.60
+    load average(平均负载):   一分钟负载,     ,十分钟负载
+
+    %Cpu0  : 83.7 us, 15.9 sy,  0.0 ni,  0.3 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+             user       system            idle(空闲的)
+             我的服务器貌似要炸了?!
+
+     PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND
+    28077 root      10 -10  158800  47384   9840 S  9.3  2.5  14:52.31 AliYunDun
+    26454 JiangCh+  20   0  214128  16996   4492 R  6.3  0.9   0:00.19 python3
+    26457 JiangCh+  20   0  213556  16496   4484 R  6.3  0.9   0:00.19 python3
+    12827 JiangCh+  20   0  492024  39332   5712 S  1.0  2.1   0:49.70 python
+
+    TIME 表示实际占用CPU的时间
+
+uptime:
+
+2. 数据库的主从复制
+    主机   <- 写入
+      |
+     bin_log
+       从机: 产生一个线程, 把主机的日志搬运过来  relay_log
+             然后把传过来的日志搬运到数据库中
+             因此会产生两个线程, 一个IO进程, 一个sql线程
+       从机  -> 读取
+       从机  -> 读取
+     读写分离
+
+
