@@ -260,3 +260,74 @@ Python -> Redis -> MySQL
 
 缓存命中率: 96%  (几乎所有的数据都是在Redis中)
 
+String:
+    - set(key, value)
+    - get(key)
+    - mset()
+    - mget()
+    - incrby()
+Hash
+    - hset
+    - hget
+    - hgetall()
+    - hincrby()
+List
+    - lpush() / rpush()
+    - lpop()  / rpop()
+    - lrange(key,start,end)    # key 值和
+    - ltrim(key,start,end)
+Set
+    - r.sadd('name',value1,value2)
+    - r.smembers('name')
+    - r.sismember()
+    - r.inter()  /   union()  /  diff()
+Zset(有序集合)
+    - r.zadd('game',{'ll',81,'yr':75,'yx':98, 'yxl':100,'hy':78,'mh':59})
+    - r.zrange() /  r.zrevrange()  降序排行
+    - r.count() / r.zrecount()
+    - r.zrank() / r.zrevrank()
+    - zincrby()    指定增加1
+
+--------------------------------------------------------------------------------------
+Day08
+缓存:
+    存储资源:
+        【寄存器、一级缓存、二级缓存、三级缓存】(这些都在CPU中)、内存、硬盘
+    计算机的主存储设备: 内存
+
+    Redis的运行机制：
+        在启动时将硬盘中的数据加载到内存中:
+        - dump rdb   redis运行过程中检查多少个key发生了修改,
+                例如当五分钟发生修改了之后, 会将内存中的数据完整的镜像到rbd文件中,
+                只保存最新的rdb文件。
+        - aof   执行的任何操作都会在aof中进行记录。
+        因此线上需要两个都开着
+
+排行榜:
+    1. 数据库
+    ①将所有用户的积分保存到积分的从表
+        HotRank
+        --------
+        uid       score
+        21         2
+        35         2037
+        836        8347
+              ...
+    ②取出前50 的数据
+        select * from HotRank order by score limit 50;
+        (这个方式不是很好, 数据量大的时候速度过慢)
+
+    ③-1 将前50 的数据写入到内存表中
+        create table cache_hotrank(
+            uid int,
+            score int
+        )charset = utf8mb4 engine = memory;
+
+    ③-2 或者将前50的数据放入到Redis中
+
+    ④ 从Redis中进行读取
+
+    2. 完全使用Redis
+        使用 zset 保存数据
+        zincrby       指定增加1
+        zrevrange     降序排行

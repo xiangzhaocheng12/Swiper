@@ -1,6 +1,8 @@
 import datetime
 
 from django.db.transaction import atomic
+
+from Swiper import config
 from common import stat
 from common import keys
 from libs.cache import rds
@@ -72,6 +74,10 @@ def like_someone(uid, sid):
     # 强制将对方从自己的优先推荐队列删除
     rds.lrem(keys.FIRST_RCMD_Q % uid, 0, sid)
 
+    # 修改滑动用户的积分:
+    score = config.SWIPE_SCORE['like']
+    rds.incrby(keys.HOTRANK_K, score, sid)
+
     # 2. 检查对方是否右划或者上划过自己
     # 这里的uid  和  sid 需要换一下位置
     # if Swiped.objects.filter(uid = sid).filter(sid = uid).filter(stype__in = ['like','superlike']):
@@ -107,6 +113,10 @@ def super_like_someone(uid, sid):
     # 强制将对方从自己的优先推荐队列删除
     rds.lrem(keys.FIRST_RCMD_Q % uid, 0, sid)
 
+    # 修改滑动用户的积分:
+    score = config.SWIPE_SCORE['superlike']
+    rds.incrby(keys.HOTRANK_K, score, sid)
+
     # 2. 检查对方是否右划或者上划过自己
     like_status = Swiped.is_liked(sid, uid)
     if like_status is True:
@@ -133,6 +143,10 @@ def dislike_someone(uid, sid):
 
     # 强制将对方从自己的优先推荐队列删除
     rds.lrem(keys.FIRST_RCMD_Q % uid, 0, sid)
+
+    # 修改滑动用户的积分:
+    score = config.SWIPE_SCORE['dislike']
+    rds.incrby(keys.HOTRANK_K, score, sid)
 
 
 def find_fans(uid):
@@ -184,15 +198,44 @@ def rewind_last_swipe(uid):
     with atomic():
         # 4.检查上次滑动记录是否匹配成功, 如果匹配成功的话, 需要删除好友
         #       不管之前有没有, 都来一次删除, 强删的话是不会报错的
-        if latest_swiped.stype in ['like','superlike']:
-            Friend.break_off(uid,latest_swiped.sid)
+        if latest_swiped.stype in ['like', 'superlike']:
+            Friend.break_off(uid, latest_swiped.sid)
 
         # 5.检查上次是否是超级喜欢, 如果是, 将自己的ID从对方的优先队列中删除
         if latest_swiped.stype == 'superlike':
             # 把对方优先队列中自己的记录给删除
-            rds.lrem(keys.FIRST_RCMD_Q %latest_swiped.sid,0,uid)
+            rds.lrem(keys.FIRST_RCMD_Q % latest_swiped.sid, 0, uid)
+
+        # 撤销被滑动用户的积分:
+        score = -config.SWIPE_SCORE[latest_swiped.stype]
+        rds.incrby(keys.HOTRANK_K, score, latest_swiped.sid)
+
         # 6.删除滑动记录
         latest_swiped.delete()
 
         # 7. 累加当天反悔次数
-        rds.set(key,rewind_times + 1)
+        rds.set(key, rewind_times + 1)
+
+
+def top_n(num):
+    '''获取热度排行前 n 的数据'''
+    # 从redis 数据取出原始排行数据
+    origin_rank = rds.zrevrange('HotRank', 0, num - 1, withscores=True)
+    # 对原始数据进行清洗
+    cleaned_rank = [[int(uid), int(score)] for uid, score in origin_rank]
+    # 取出所有用户
+    uid_list = [uid for uid, _ in cleaned_rank]
+    users = User.objects.filter(id__in=uid_list)
+    # 将user 按照 uid_list 中的索引排序
+    users = sorted(users, key=lambda user: uid_list.index(user.id))
+
+    rank_data = []
+    exclude_fields = ['phonenum', 'birthday', 'location', 'vip_id', 'vip_end']
+    for index, (_, score) in enumerate(cleaned_rank):
+        user = users[index]
+        user_info = user.to_dict(exclude_fields)
+        user_info['rank'] = index + 1
+        user_info['score'] = score
+        rank_data.append(user_info)
+
+    return rank_data

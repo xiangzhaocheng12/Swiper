@@ -73,16 +73,16 @@ class User(models.Model):
         self.vip_end = datetime.datetime.now() + datetime.timedelta(self._vip.duration)
         self.save()
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'phonenum': self.phonenum,
-            'nickname': self.nickname,
-            'gender': self.gender,
-            'birthday': str(self.birthday),
-            'avatar': self.avatar,
-            'location': self.location,
-        }
+    # def to_dict(self):
+    #     return {
+    #         'id': self.id,
+    #         'phonenum': self.phonenum,
+    #         'nickname': self.nickname,
+    #         'gender': self.gender,
+    #         'birthday': str(self.birthday),
+    #         'avatar': self.avatar,
+    #         'location': self.location,
+    #     }
 
 
 class Profile(models.Model):
@@ -99,19 +99,19 @@ class Profile(models.Model):
     only_matched = models.BooleanField(default=False, verbose_name='是否不让陌⽣⼈看我的相册')
     auto_play = models.BooleanField(default=False, verbose_name='是否⾃动播放视频')
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'dating_location': self.dating_location,
-            'dating_gender': self.dating_gender,
-            'min_distance': self.min_distance,
-            'max_distance': self.max_distance,
-            'min_dating_age': self.min_dating_age,
-            'max_dating_age': self.max_dating_age,
-            'vibration': self.vibration,
-            'only_matched': self.only_matched,
-            'auto_play': self.auto_play,
-        }
+    # def to_dict(self):
+    #     return {
+    #         'id': self.id,
+    #         'dating_location': self.dating_location,
+    #         'dating_gender': self.dating_gender,
+    #         'min_distance': self.min_distance,
+    #         'max_distance': self.max_distance,
+    #         'min_dating_age': self.min_dating_age,
+    #         'max_dating_age': self.max_dating_age,
+    #         'vibration': self.vibration,
+    #         'only_matched': self.only_matched,
+    #         'auto_play': self.auto_play,
+    #     }
 
     class Meta:
         db_table = 'profile'

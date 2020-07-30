@@ -68,3 +68,9 @@ def friends(request):
     # 类似前面的方式把结果弄出来 列表里面包着多个字典
     result = [frd.to_dict() for frd in friends]
     return render_json(data=result)
+
+
+def hot_rank(request):
+    '''热度排名'''
+    rank_data = logics.top_n(50)
+    return render_json(rank_data)
