@@ -20,5 +20,5 @@ def render_json(data=0, code=stat.OK):
     else:
         # 线上环境, 将返回值转化成紧凑格式
         json_str = json.dumps(result, ensure_ascii=False, separators=(',', ':'))
-    # 必须返回一个HttpResponse的对象, 因为JsonResponse继承自HttpResponse
+    # 必须返回一个HttpResponse的对象, 因为JsonResponse继承自 HttpResponse
     return HttpResponse(json_str,content_type='application/json')

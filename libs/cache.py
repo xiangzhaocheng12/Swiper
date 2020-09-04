@@ -1,7 +1,7 @@
 # HIGHEST_PROTOCOL 表示最高的协议 HIGHEST_PROTOCOL = 4,
 # 默认的协议版本是 3
-from pickle import dumps, loads, HIGHEST_PROTOCOL
-from pickle import UnpicklingError
+from pickle import dumps, loads, HIGHEST_PROTOCOL, UnpicklingError
+
 from redis import Redis as _Redis
 
 from Swiper.config import REDIS
@@ -42,7 +42,7 @@ class Redis(_Redis):
         """
         picked_value = super().get(name)
 
-        # 如果picked_value 是空的话,返回默认值
+        # 如果 picked_value 是空的话,返回默认值
         if picked_value is None:
             return default
         # 如果loads 的值可以直接序列化, 那么直接返回,
@@ -55,4 +55,4 @@ class Redis(_Redis):
 
 # 全局变量的单例模式:
 # 只在模块里面创建了一次, 而不会每次引用的时候都去创建
-rds = Redis(**REDIS)    # REDIS 写在了 config 配置文件里面
+rds = Redis(**REDIS)  # REDIS 写在了 config 配置文件里面

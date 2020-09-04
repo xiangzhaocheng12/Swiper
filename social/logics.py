@@ -15,7 +15,7 @@ from django.db.utils import IntegrityError
 def rcmd_from_queue(uid):
     '''从优先队列里进行推荐'''
     key = keys.FIRST_RCMD_Q % uid
-    uid_list = rds.lrange(key, 0, 19)  # 从Redis 取出 优先推荐的用户 ID
+    uid_list = rds.lrange(key, 0, 19)  # 从 Redis 取出 优先推荐的用户 ID
     # 这里取出来的都是 bytes 类型的数据, 还需要强转成 int
     uid_list = [int(r_uid) for r_uid in uid_list]  # 将uid 列表元素
     return User.objects.filter(id__in=uid_list)

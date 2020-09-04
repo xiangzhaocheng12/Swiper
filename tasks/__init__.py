@@ -4,7 +4,7 @@ from celery import Celery
 from tasks import config
 
 
-# 此时celery还是一个独立的模块,需要加载到django的环境中
+# 此时celery还是一个独立的模块,需要加载到 django 的环境中
 # 类似manage.py 里面的os.environ.setdefault(...)
 # 首先加载这个环境变量, 必须写在最前面!!!
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Swiper.settings")

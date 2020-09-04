@@ -58,13 +58,13 @@ def submit(request):
     #       None == None
     if True:  # vcode and vcode == cached_vcode:
         # 根据手机号获取用户
-        # flask 里面不是 objects, 而是一个query
+        # flask 里面不是 objects, 而是一个 query
         #   User.query.filter(...).one()
         # get:只能获取一个
         try:
             user = User.objects.get(phonenum=phonenum)
             inf_logger.info(f'{user.id} login')
-        # 这里不能只写一个except, 需要精确的写上一个异常
+        # 这里不能只写一个 except, 需要精确的写上一个异常
         except User.DoesNotExist:
             # user = User()
             # ....
@@ -104,8 +104,8 @@ def show(request):
 
 
 def update(request):
-    '''修改资料'''
-    # 从request.POST 里面得到一个类字典的对象
+    """ 修改资料 """
+    # 从 request.POST 里面得到一个类字典的对象
     user_form = UserForm(request.POST)
     profile_form = ProfileForm(request.POST)
     # 如果两个提交的信息都没有问题的话:
@@ -117,7 +117,7 @@ def update(request):
         # UserForm.cleaned_data 是更新的数据, 并且需要进行拆包, 因为这个是一个字典
         User.objects.filter(id=uid).update(**user_form.cleaned_data)
 
-        # 先更新, 如果没有数据可供更新的话, 创建一个新的并将 default 作为默认的写进去
+        # 先更新, 如果没有数据可供更新的话,   default 作为默认的写进去
         Profile.objects.update_or_create(id=uid, defaults=profile_form.cleaned_data)
 
         # 清除旧缓存
@@ -135,7 +135,7 @@ def update(request):
 
 
 def qn_token(request):
-    '''获取头像上传凭证'''
+    """获取头像上传凭证"""
     # 中间件里面已经设置了 request.uid = uid 了
     # 这个是用户访问的, 用户访问之后返回一个 token
     # 增加一个 Avatar, 用来表示头像, 为了将该用户账户上的头像和别的用户相区别

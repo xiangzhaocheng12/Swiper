@@ -14,12 +14,14 @@ def get(self, *args, **kwargs):
     Performs the query and returns a single object matching the given
     keyword arguments.
     """
-    # 这里的self 是 object 继承过来的 queryset对象
-    cls_name = self.model.__name__  # 取出当前model 的名字
+    # 这里的self 是 object 继承过来的 queryset 对象
+    # 这里的 model 指的就是这个类
+    cls_name = self.model.__name__  # 取出当前 model 的名字
     # 检查 kwargs里面有没有主键
-    pk = kwargs.get('id') or kwargs.get('pk')
+    # 针对主键来进行一个缓存
+    pk =kwargs.get('pk') or kwargs.get('id')
     if pk:
-        # 从redis 获取model 对象
+        # 从redis 获取 model 对象
         key = MODEL_K % (cls_name, pk)
         model_obj = rds.get(key)
         # 判断当前取出来的对象是不是 model 的一个实例
@@ -53,7 +55,7 @@ def save(self, force_insert=False, force_update=False, using=None,
     # a ForeignKey or OneToOneField on this model. If the field is
     # nullable, allowing the save() would result in silent data loss.
 
-    # 先执行 Django 原生save方法将数据保存到 Database
+    # 先执行 Django 原生 save方法将数据保存到 Database
     self._save()
 
     # 将对象保存到redis

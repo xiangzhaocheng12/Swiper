@@ -21,6 +21,11 @@ class AuthMiddleware(MiddlewareMixin):
         # 检查当前接口是否在白名单中
         if request.path in self.white_list:
             return
+
+        # 设置当前用户一直是 1002 登陆的, 用于测试时使用
+        request.uid = 1002
+        return
+
         uid = request.session.get('uid')
         if uid is None:
             # 这个code是啥
